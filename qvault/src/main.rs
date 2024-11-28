@@ -13,20 +13,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Set up terminal
     let mut qtui = qvault_tui::QvaultTerminal::new()?;
 
-    // Display the main menu
-    display_main_menu(&mut qtui)?;
+    qtui.show_qvault_screen()?;
 
     // Main event loop
+    qtui.show_prompt()?;
     for evt in io::stdin().events() {
+        qtui.show_prompt()?;
         match evt? {
             Event::Key(Key::Char('q')) => break, // Exit on 'q'
-            Event::Key(Key::Char('1')) => keyboard_demo(&mut qtui)?,
-            Event::Key(Key::Char('3')) => cursor_movement_demo(&mut qtui)?,
-            Event::Key(Key::Char('4')) => horizontal_lines_demo(&mut qtui)?,
-            Event::Key(Key::Char('5')) => horizontal_bar_demo(&mut qtui)?,
             _ => continue,
         }
-        display_main_menu(&mut qtui)?;
     }
 
     Ok(())
