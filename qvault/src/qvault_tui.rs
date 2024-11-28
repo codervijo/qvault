@@ -1,5 +1,6 @@
 use std::io::{self, Write};
 use termion::raw::{IntoRawMode, RawTerminal};
+use termion::{input::TermRead, event::{Key, Event}};
 use termion::cursor;
 
 pub struct QvaultTerminal {
@@ -69,6 +70,42 @@ impl QvaultTerminal {
         self.terminal.flush();
 
         Ok(())
+    }
+
+    pub fn tui_get_input(&mut self) -> Result<String, Box<dyn std::error::Error>> {
+        // Create a buffer to store the user input
+        let mut buffer = String::new();
+
+        // Inform the user
+        write!(self.terminal, "{}Reading input in raw mode, press 'q' to quit{}",     cursor::Goto(1, 1), cursor::Hide)?;
+        self.terminal.flush()?;
+
+        // Start reading events from the terminal
+        for event in io::stdin().events() {
+            match event? {
+                Event::Key(Key::Char('\n')) => break, // Stop at Enter key
+                Event::Key(Key::Char(c)) => {
+                    // Add character to the buffer
+                    buffer.push(c);
+                },
+                Event::Key(Key::Backspace) => {
+                    // Remove the last character from the buffer
+                    buffer.pop();
+                },
+                _ => {}
+            }
+
+            // Display the current input in the terminal
+            write!(self.terminal, "{}{}", cursor::Goto(1, 2), buffer)?;
+            self.terminal.flush()?;
+        }
+
+        // Show the final input once user presses 'q'
+        write!(self.terminal, "{}You entered: {}", cursor::Goto(1, 4), buffer)?;
+        self.terminal.flush()?;
+
+        // Return the collected input
+        Ok(buffer)
     }
 
     // Method to shut down and restore terminal settings

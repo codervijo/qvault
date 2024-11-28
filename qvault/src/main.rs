@@ -16,12 +16,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     qtui.show_qvault_screen()?;
 
     // Main event loop
-    qtui.show_prompt()?;
-    for evt in io::stdin().events() {
+    loop {
         qtui.show_prompt()?;
-        match evt? {
-            Event::Key(Key::Char('q')) => break, // Exit on 'q'
-            _ => continue,
+        let iput = qtui.tui_get_input()?;
+        println!("Got input string {}", iput);
+        if iput == "exit" {
+            break;
         }
     }
 
