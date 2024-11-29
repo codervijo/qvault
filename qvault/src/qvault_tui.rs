@@ -17,7 +17,7 @@ pub struct QvaultTerminal {
 impl QvaultTerminal {
     // Constructor to initialize the terminal in raw mode with mouse support
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        let mut terminal = io::stdout().into_raw_mode()?; // Convert stdout into raw mode
+        let terminal = io::stdout().into_raw_mode()?; // Convert stdout into raw mode
 
         Ok(QvaultTerminal {
             terminal,
@@ -42,7 +42,7 @@ impl QvaultTerminal {
 
     pub fn show_msg(&mut self, msg: String) -> Result<(), Box<dyn std::error::Error>> {
         writeln!(self.terminal, "{}{}", cursor::Goto(1, self.output_row), msg)?;
-        self.terminal.flush();
+        self.terminal.flush()?;
 
         Ok(())
     }
@@ -80,7 +80,7 @@ impl QvaultTerminal {
             cursor::Goto(1, self.input_row)
         )?;
 
-        self.terminal.flush();
+        self.flush()?;
 
         Ok(())
     }
@@ -93,7 +93,7 @@ impl QvaultTerminal {
             cursor::Goto(1, self.input_row), // Move to input row, column 1
             clear::CurrentLine               // Clear the entire current line
         )?;
-        self.terminal.flush();
+        self.flush()?;
         self.input_col = 3;
 
         Ok(())
@@ -173,17 +173,15 @@ impl QvaultTerminal {
     }
 
     // Method to shut down and restore terminal settings
-    pub fn shutdown(mut self) -> Result<(), Box<dyn std::error::Error>> {
-        write!(
+    pub fn shutdown(mut self) {
+        let _ = write!(
             self.terminal,
             "{}{}{}",
             termion::clear::All,
             cursor::Show,
             cursor::Goto(1, 1)
-        )?;
-        self.terminal.flush()?;
-        //self.terminal.show_cursor()?; // Ensure cursor is shown when shutting down
-
-        Ok(())
+        );
+        let _ = self.terminal.flush();
+        //self.terminal.show_cursor()?; // Ensure cursor is shown when shutting
     }
 }

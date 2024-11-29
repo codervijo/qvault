@@ -1,5 +1,4 @@
 mod qvault_tui;
-use qvault_tui::QvaultTerminal;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Set up terminal
@@ -9,10 +8,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Main event loop
     loop {
-        qtui.write_bar_message("Enter search query below");
+        let _ = qtui.write_bar_message("Enter search query below");
         qtui.show_prompt()?;
         let iput = qtui.tui_get_input()?;
-        qtui.show_msg(format!("Got input string {}", iput));
+        let _ = qtui.show_msg(format!("Got input string {}", iput));
         if iput == "exit" {
             break;
         }
