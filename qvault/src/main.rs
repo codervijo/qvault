@@ -1,13 +1,5 @@
-use std::io::{self, Write};
-use termion::cursor;
-use termion::event::{Event, Key};
-use termion::input::TermRead;
-use termion::raw::{IntoRawMode, RawTerminal};
-
 mod qvault_tui;
 use qvault_tui::QvaultTerminal;
-
-type Terminal = RawTerminal<io::Stdout>;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Set up terminal
