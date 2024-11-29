@@ -5,6 +5,10 @@ use termion::cursor;
 
 pub struct QvaultTerminal {
     terminal: RawTerminal<io::Stdout>,
+    input_row: u16,
+    input_col: u16,
+    output_row: u16,
+    hbar_row: u16,
 }
 
 impl QvaultTerminal {
@@ -12,7 +16,12 @@ impl QvaultTerminal {
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
         let mut terminal = io::stdout().into_raw_mode()?; // Convert stdout into raw mode
 
-        Ok(QvaultTerminal { terminal })
+        Ok(QvaultTerminal { terminal,
+                            input_row: 1,
+                            input_col: 1, 
+                            output_row: 1,
+                            hbar_row:1
+                        })
     }
 
     // Getter for the terminal
@@ -28,7 +37,7 @@ impl QvaultTerminal {
     }
 
     pub fn show_msg(&mut self, msg: String) -> Result<(), Box<dyn std::error::Error>> {
-        writeln!(self.terminal, "{}", msg)?;
+        writeln!(self.terminal, "{}{}", cursor::Goto(1, self.output_row), msg)?;
 
         Ok(())
     }
@@ -39,14 +48,15 @@ impl QvaultTerminal {
         let (width, height) = termion::terminal_size()?;
 
         // Calculate the row position near the bottom
-        let row_position = height - 1;
+        self.hbar_row = height - 1;
+        self.input_row = self.hbar_row + 1;
 
         // Move cursor to the calculated row position and column 1 (start of the line)
         write!(
             self.terminal,
             "{}{}{}",
             termion::clear::All,          // Clear the screen
-            cursor::Goto(1, row_position), // Move cursor to 2/3 from the bottom
+            cursor::Goto(1, self.hbar_row), // Move cursor
             "\x1b[48;5;12m"               // Set the background to light blue (color code 12 in 256 palette)
         )?;
         // Create a horizontal line of 80 characters of light blue (adjust the width if needed)
@@ -58,7 +68,7 @@ impl QvaultTerminal {
         write!(self.terminal, "{}{}", "\x1b[0m", cursor::Show)?;
 
         // Move the cursor to the next line but go to column 1 (column 0 in Rust)
-        write!(self.terminal, "{}{}", cursor::Down(1), cursor::Goto(1, row_position + 1))?;
+        write!(self.terminal, "{}{}", cursor::Down(1), cursor::Goto(1, self.input_row ))?;
 
         self.terminal.flush();
 
@@ -68,6 +78,7 @@ impl QvaultTerminal {
     pub fn show_prompt(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         write!(self.terminal, ">")?;
         self.terminal.flush();
+        self.input_col = 2;
 
         Ok(())
     }
@@ -77,7 +88,7 @@ impl QvaultTerminal {
         let mut buffer = String::new();
 
         // Inform the user
-        write!(self.terminal, "{}Reading input in raw mode, press 'q' to quit{}",     cursor::Goto(1, 1), cursor::Hide)?;
+        //write!(self.terminal, "{}Reading input in raw mode, press 'q' to quit{}",     cursor::Goto(1, 1), cursor::Hide)?;
         self.terminal.flush()?;
 
         // Start reading events from the terminal
@@ -96,12 +107,12 @@ impl QvaultTerminal {
             }
 
             // Display the current input in the terminal
-            write!(self.terminal, "{}{}", cursor::Goto(1, 2), buffer)?;
+            write!(self.terminal, "{}{}", cursor::Goto(self.input_col, self.input_row), buffer)?;
             self.terminal.flush()?;
         }
 
         // Show the final input once user presses 'q'
-        write!(self.terminal, "{}You entered: {}", cursor::Goto(1, 4), buffer)?;
+        //write!(self.terminal, "{}You entered: {}", cursor::Goto(1, 4), buffer)?;
         self.terminal.flush()?;
 
         // Return the collected input
@@ -113,6 +124,7 @@ impl QvaultTerminal {
         writeln!(self.terminal, "{}", cursor::Show);
         self.terminal.flush()?;
         //self.terminal.show_cursor()?; // Ensure cursor is shown when shutting down
+
         Ok(())
     }
 }
