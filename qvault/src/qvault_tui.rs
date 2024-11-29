@@ -1,7 +1,7 @@
 use std::io::{self, Write};
 use termion::raw::{IntoRawMode, RawTerminal};
 use termion::{input::TermRead, event::{Key, Event}};
-use termion::cursor;
+use termion::{cursor, clear};
 
 pub struct QvaultTerminal {
     terminal: RawTerminal<io::Stdout>,
@@ -38,6 +38,7 @@ impl QvaultTerminal {
 
     pub fn show_msg(&mut self, msg: String) -> Result<(), Box<dyn std::error::Error>> {
         writeln!(self.terminal, "{}{}", cursor::Goto(1, self.output_row), msg)?;
+        self.terminal.flush();
 
         Ok(())
     }
@@ -76,7 +77,13 @@ impl QvaultTerminal {
     }
 
     pub fn show_prompt(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        write!(self.terminal, ">")?;
+        // Move to the input row and clear the current line
+        write!(
+            self.terminal,
+            "{}{}>", // Clear the line and display the prompt
+            cursor::Goto(1, self.input_row), // Move to input row, column 1
+            clear::CurrentLine              // Clear the entire current line
+        )?;
         self.terminal.flush();
         self.input_col = 2;
 
