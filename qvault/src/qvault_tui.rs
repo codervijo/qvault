@@ -89,12 +89,12 @@ impl QvaultTerminal {
         // Move to the input row and clear the current line
         write!(
             self.terminal,
-            "{}{}>",                         // Clear the line and display the prompt
+            "{}{}\u{1F50D}>",                         // Clear the line and display the prompt
             cursor::Goto(1, self.input_row), // Move to input row, column 1
             clear::CurrentLine               // Clear the entire current line
         )?;
         self.terminal.flush();
-        self.input_col = 2;
+        self.input_col = 3;
 
         Ok(())
     }
@@ -107,12 +107,24 @@ impl QvaultTerminal {
         // Move the cursor to the horizontal bar row and the calculated column
         write!(
             self.terminal,
-            "{}{}{}{}",
+            "{}{}\u{1F4DA} {}{}",
             cursor::Goto(1, self.hbar_row), // Move cursor
             "\x1b[1;37m\x1b[48;5;12m",             // Set bold white text with light blue background
             msg,                                   // Write the message
             "\x1b[0m"                              // Reset text style
         )?;
+
+        //println!("Search \u{1F50D}");
+        // Get the terminal size (width and height)
+        let (width, _) = termion::terminal_size()?;
+
+        // Move the cursor to the last column of the first row
+        write!(
+            self.terminal,
+            "{}\u{1F5C4}", // Unicode for file cabinet emoji
+            cursor::Goto(width-2, self.hbar_row)
+        )?;
+
 
         // Restore the cursor to its original position
         write!(self.terminal, "{}", cursor::Restore)?;
@@ -120,7 +132,7 @@ impl QvaultTerminal {
         self.terminal.flush()?;
         Ok(())
     }
-
+ 
     pub fn tui_get_input(&mut self) -> Result<String, Box<dyn std::error::Error>> {
         // Create a buffer to store the user input
         let mut buffer = String::new();
