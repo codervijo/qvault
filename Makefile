@@ -53,6 +53,9 @@ start: $(SERVER_APP_NAME)/target/debug build
 run:
 	(cd $(SERVER_APP_NAME) && cargo run)
 
+format:
+	(cd $(SERVER_APP_NAME) && cargo fmt)
+
 .PHONY:clean
 clean: stop
 	@echo "Cleaning up..."
