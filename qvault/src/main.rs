@@ -12,7 +12,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let _ = qtui.write_bar_message("Enter search query below");
         qtui.show_prompt()?;
         let iput = qtui.tui_get_input()?;
-        let _qcmd = qvault_cmd::QvaultCmd::from_input(&iput);
+        let qcmd = qvault_cmd::QvaultCmd::from_input(&iput);
+        qcmd?.handle_cmd(&mut qtui);
         let _ = qtui.show_msg(format!("Got input string {}", iput));
         if iput == "exit" {
             break;
