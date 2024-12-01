@@ -45,7 +45,15 @@ impl FromStr for QvaultCmdName {
 
 pub fn handle_search(args: &[String], term: &mut QvaultTerminal) {
     term.show_msg(format!("Searching done for args {:?}", args));
-    // todo search
+    // Call the search function
+    match qvault_search::search_brave(&args[0]) {
+        Ok(results) => {
+            println!("Search result : {:?}", results);
+        }
+        Err(err) => {
+            eprintln!("Search failed: {}", err);
+        }
+    }
 }
 
 pub fn handle_exit(_args: &[String], term: &mut QvaultTerminal) {

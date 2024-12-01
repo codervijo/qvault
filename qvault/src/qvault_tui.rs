@@ -106,7 +106,7 @@ impl QvaultTerminal {
         // Move the cursor to the horizontal bar row and the calculated column
         write!(
             self.terminal,
-            "{}{}\u{1F4DA} {}{}",
+            "{}{}\u{1F30D}  \u{1F4DA}  {}{}",
             cursor::Goto(1, self.hbar_row), // Move cursor
             "\x1b[1;37m\x1b[48;5;12m",      // Set bold white text with light blue background
             msg,                            // Write the message
