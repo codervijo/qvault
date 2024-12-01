@@ -47,8 +47,10 @@ pub fn handle_search(args: &[String], term: &mut QvaultTerminal) {
     term.show_msg(format!("Searching done for args {:?}", args));
     // Call the search function
     match qvault_search::search_brave(&args[0]) {
-        Ok(results) => {
-            println!("Search result : {:?}", results);
+        Ok(result) => {
+            println!("Search result : {:?}", result);
+            term.show_output_title(result.title().to_string());
+            term.show_output_message(1, result.snippet().to_string());
         }
         Err(err) => {
             eprintln!("Search failed: {}", err);

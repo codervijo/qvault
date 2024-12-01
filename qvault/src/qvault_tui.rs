@@ -47,6 +47,35 @@ impl QvaultTerminal {
         Ok(())
     }
 
+    pub fn show_output_title(&mut self, title: String) -> Result<(), Box<dyn std::error::Error>> {
+        writeln!(
+            self.terminal,
+            "{}{}{}{}{}{}",
+            cursor::Goto(1, self.output_row + 5), // Move cursor to the correct position
+            "\x1b[1m",                            // Start bold text
+            "\u{1F340}\u{1F340}\u{1F340}\u{1F340}\u{1F340} ", // Left border decoration
+            title.to_uppercase(),                 // Title in uppercase
+            " \u{1F340}\u{1F340}\u{1F340}\u{1F340}\u{1F340}", // Right border decoration
+            "\x1b[0m"                             // Reset text formatting
+        )?;
+        self.terminal.flush()?;
+
+        Ok(())
+    }
+
+    pub fn show_output_message(&mut self, line: u16, msg: String) -> Result<(), Box<dyn std::error::Error>> {
+        writeln!(
+            self.terminal,
+            "{}{}{}",
+            cursor::Goto(1, self.output_row + 5+1+line), // Move cursor to the correct position
+            "\u{1F7E2}  ", // Left border decoration
+            msg,                 // Title in uppercase
+        )?;
+        self.terminal.flush()?;
+
+        Ok(())
+    }
+
     pub fn show_qvault_screen(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         //writeln!(self.terminal, "{}", msg)?;
         // Get the terminal size (columns and rows)

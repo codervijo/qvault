@@ -7,9 +7,29 @@ pub struct SearchResult {
     snippet: String,
 }
 
+impl SearchResult {
+    pub fn title(&self) -> &str {
+        &self.title
+    }
+
+    pub fn url(&self) -> &str {
+        &self.url
+    }
+
+    pub fn snippet(&self) -> &str {
+        &self.snippet
+    }
+}
+
 #[derive(Serialize, Debug)]
-pub struct ErrorResponse {
+pub struct SearchErrorResponse {
     error: String,
+}
+
+impl SearchErrorResponse {
+    pub fn error(&self) -> &str {
+        &self.error
+    }
 }
 
 // Mocking the Brave search function; replace with actual implementation
