@@ -1,6 +1,7 @@
 use crate::qvault_tui;
 use crate::qvault_tui::QvaultTerminal;
 use std::str::FromStr;
+mod qvault_search;
 
 pub enum QvaultCmdName {
     Help,
@@ -42,8 +43,9 @@ impl FromStr for QvaultCmdName {
     }
 }
 
-pub fn handle_search(_args: &[String], term: &mut QvaultTerminal) {
-    term.show_msg("Searching done".to_string());
+pub fn handle_search(args: &[String], term: &mut QvaultTerminal) {
+    term.show_msg(format!("Searching done for args {:?}", args));
+    // todo search
 }
 
 pub fn handle_exit(_args: &[String], term: &mut QvaultTerminal) {
