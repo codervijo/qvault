@@ -45,7 +45,7 @@ sudo docker run -it --rm \
     --env="QT_X11_NO_MITSHM=1" \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v ${PWD}:/usr/src/app/ \
-    -p 9460:7454 \
+    -p 9400:7454 \
     ${CONTAINER} \
     /bin/bash
 
