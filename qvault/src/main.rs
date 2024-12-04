@@ -13,11 +13,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Main event loop
     loop {
-        qvault_log::log_info("Looping ..");
+        qvault_log::log_info("Looping ..", format_args!(""));
         let _ = qtui.write_bar_message("Enter search query below");
         qtui.show_prompt()?;
         let iput = qtui.tui_get_input()?;
-        qvault_log::log_info(&format!("Got input from User {}", iput).to_string());
+        qvault_log::log_info("Got input from User >>", format_args!("{}", iput));
         let qcmd = qvault_cmd::QvaultCmd::from_input(&iput);
         qcmd?.handle_cmd(&mut qtui);
         let _ = qtui.show_msg(format!("Got input string {}", iput));
@@ -26,7 +26,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    qvault_log::log_info("Exiting from qvault session");
+    qvault_log::log_info("Exiting from qvault session", format_args!(""));
     qtui.shutdown();
 
     Ok(())

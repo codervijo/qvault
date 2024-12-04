@@ -48,6 +48,12 @@ impl QvaultTerminal {
     }
 
     pub fn show_output_title(&mut self, title: String) -> Result<(), Box<dyn std::error::Error>> {
+        let title = if title.is_empty() {
+            "SEARCH RESULTS".to_string()
+        } else {
+            title
+        };
+
         writeln!(
             self.terminal,
             "{}{}{}{}{}{}",

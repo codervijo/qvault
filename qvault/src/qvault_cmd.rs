@@ -49,7 +49,7 @@ pub fn handle_search(args: &[String], term: &mut QvaultTerminal) {
     if args.len() > 0 {
         match && qvault_search::search_brave(&args[0]) {
             Ok(result) => {
-                println!("Search result : {:?}", result);
+                //println!("Search result : {:?}", result);
                 term.show_output_title(result.title().to_string());
                 term.show_output_message(1, result.snippet().to_string());
             }

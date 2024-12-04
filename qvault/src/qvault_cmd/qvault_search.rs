@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::env;
 use std::fs;
 use dotenv::dotenv;
+use std::fmt;
 
 use crate::qvault_log;
 use crate::qvault_log::log_info;
@@ -28,6 +29,36 @@ pub struct SearchResult {
     snippet: String,
 }
 */
+
+// Implement Display for SearchResult
+impl fmt::Display for SearchResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Format the error and status if present
+        if let Some(ref err) = self.error {
+            write!(f, "Error: {}\n", err)?;
+        }
+
+        if let Some(status_code) = self.status {
+            write!(f, "Status: {}\n", status_code)?;
+        }
+
+        // Format the items if present
+        if let Some(ref items) = self.items {
+            for item in items {
+                write!(f, "{}\n", item)?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+// Implement Display for SearchItem
+impl fmt::Display for SearchItem {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Title: {}, URL: {}", self.title, self.url)
+    }
+}
 
 impl SearchResult {
     pub fn title(&self) -> &str {
@@ -96,7 +127,7 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
         });
     }
 
-    qvault_log::log_info(&format!("Doing brave search for query {}", query).to_string());
+    log_info("Doing brave search for query >>", format_args!("{}", query));
     let mut api_key = env::var("BRAVE_SEARCH_API_KEY").ok();
 
     if api_key.is_none() {
@@ -142,14 +173,16 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
 
                             // Attempt to parse as JSON
                             match serde_json::from_str::<serde_json::Value>(&body) {
-                                Ok(json) => println!("Parsed JSON: {:#?}", json),
+                                Ok(json) => log_info("Parsed JSON: ",format_args!("{}", json)),
                                 Err(err) => eprintln!("Failed to parse JSON: {}", err),
                             }
 
                             // Attempt to Parse JSON
                             match serde_json::from_str::<SearchResult>(&body) {
                                 Ok(result) => {
-                                    println!("Parsed SearchResult: {:#?}", result);
+                                    //println!("Parsed SearchResult: {:#?}", result);
+                                    //log_info("Parsed SearchResult:", &[result]);
+                                    log_info("Parsed SearchResult: {}", format_args!("{}", result));
                                     Ok(result)
                                 }
                                 Err(json_err) => {
@@ -158,7 +191,8 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
                                     // Attempt to parse as generic JSON for further debugging
                                     match serde_json::from_str::<serde_json::Value>(&body) {
                                         Ok(generic_json) => {
-                                            println!("Parsed as generic JSON for inspection: {:#?}", generic_json);
+                                            //println!("Parsed as generic JSON for inspection: {:#?}", generic_json);
+                                            log_info("Parsed as generic JSON for inspection", format_args!("{}", generic_json));
                                         }
                                         Err(generic_err) => {
                                             eprintln!("Failed to parse as generic JSON: {}", generic_err);

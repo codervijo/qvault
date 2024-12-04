@@ -54,14 +54,19 @@ pub fn init_log() {
 }
 
 /// Convenience functions for logging
-pub fn log_info(message: &str) {
-    log::info!("{}", message);
+use std::fmt::{self, Arguments};
+
+pub fn log_info(message: &str, args: Arguments) {
+    let formatted_message = format!("{}", args); // Convert Arguments to string
+    // Assuming logging to a file or stdout
+    log::info!("{}", formatted_message); // Print or log the formatted message
 }
 
-pub fn log_warn(message: &str) {
+
+pub fn log_warn(message: String) {
     log::warn!("{}", message);
 }
 
-pub fn log_error(message: &str) {
+pub fn log_error(message: String) {
     log::error!("{}", message);
 }
