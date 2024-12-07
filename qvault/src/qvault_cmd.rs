@@ -1,9 +1,11 @@
 use crate::qvault_tui::{QvaultTerminal}; // Adjust imports based on your module structure
-mod qvault_search;
 use crate::qvault_log;
 use serde::{Serialize, Deserialize};
 use std::fmt;
 use std::str::FromStr;
+
+mod qvault_search;
+mod qvault_ai;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum QvaultCmdName {
@@ -67,24 +69,35 @@ pub fn handle_search(args: &[String], term: &mut QvaultTerminal) {
 }
 
 pub fn handle_exit(_args: &[String], term: &mut QvaultTerminal) {
-    term.show_msg("Quitting".to_string());
+    term.show_output_title("Quitting".to_string());
 }
 
 pub fn handle_help(_args: &[String], term: &mut QvaultTerminal) {
-    term.show_msg("Displaying help".to_string());
+    term.show_output_title("Help".to_string());
 }
 
 pub fn handle_history(_args: &[String], term: &mut QvaultTerminal) {
-    term.show_msg("History command invoked".to_string());
+    term.show_output_title("History command".to_string());
 }
 
 pub fn handle_set(_args: &[String], term: &mut QvaultTerminal) {
-    term.show_msg("Set command invoked".to_string());
+    term.show_output_title("Set command".to_string());
 }
 
 pub fn handle_ai(args: &[String], term: &mut QvaultTerminal) {
-    term.show_output_title("AI command invoked".to_string());
-    qvault_log::log_info("AI ommand executed:", format_args!("{}", args.join(", ")));
+    term.show_output_title("AI Response".to_string());
+    qvault_log::log_info("AI command executed:", format_args!("{}", args.join(", ")));
+    qvault_log::log_info("Searching for args: ", format_args!("{}", args.join(", ")));
+    if !args.is_empty() {
+        match qvault_ai::chat_with_openai(&args.join(" ")) {
+            Ok(result) => {
+                term.show_output_message(1, result.to_string());
+            }
+            Err(err) => {
+                term.show_msg(format!("Search failed: {}", err));
+            }
+        }
+    }
 }
 
 impl QvaultCmdName {

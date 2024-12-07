@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let qcmd = qvault_cmd::QvaultCmd::from_input(&iput)?;
         qcmd.clone().log_it();
         qcmd.handle_cmd(&mut qtui);
-        let _ = qtui.show_msg(format!("Got input string {}", iput));
+        //let _ = qtui.show_msg(format!("Got input string {}", iput));
         if iput == "exit" {
             break;
         }

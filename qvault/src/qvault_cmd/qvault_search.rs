@@ -127,7 +127,7 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
         });
     }
 
-    //log_info("Doing brave search for query >>", format_args!("{}", query));
+    log_info("Doing brave search for query >>", format_args!("{}", query));
     let mut api_key = env::var("BRAVE_SEARCH_API_KEY").ok();
 
     if api_key.is_none() {
@@ -182,7 +182,7 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
                                 Ok(result) => {
                                     //println!("Parsed SearchResult: {:#?}", result);
                                     //log_info("Parsed SearchResult:", &[result]);
-                                    //log_info("Parsed SearchResult: {}", format_args!("def {}", result));
+                                    log_info("Parsed SearchResult: {}", format_args!("def {}", result));
                                     Ok(result)
                                 }
                                 Err(json_err) => {
