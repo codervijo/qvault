@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ratatui = { version = "0.20", features = ["termion"] }
 serde = { version = "1.0", features = ["derive"] }
 termion = "4.0.3"
 tui = { version = "0.19", features = ["termion"] }
