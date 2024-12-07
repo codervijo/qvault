@@ -41,7 +41,7 @@ impl QvaultTerminal {
     }
 
     pub fn show_msg(&mut self, msg: String) -> Result<(), Box<dyn std::error::Error>> {
-        writeln!(self.terminal, "{}{}", cursor::Goto(1, self.output_row), msg)?;
+        writeln!(self.terminal, "{}{}", cursor::Goto(1, self.output_row+2), msg)?;
         self.terminal.flush()?;
 
         Ok(())

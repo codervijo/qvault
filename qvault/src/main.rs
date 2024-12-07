@@ -18,8 +18,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         qtui.show_prompt()?;
         let iput = qtui.tui_get_input()?;
         qvault_log::log_info("Got input from User >>", format_args!("{}", iput));
-        let qcmd = qvault_cmd::QvaultCmd::from_input(&iput);
-        qcmd?.handle_cmd(&mut qtui);
+        let qcmd = qvault_cmd::QvaultCmd::from_input(&iput)?;
+        qcmd.clone().log_it();
+        qcmd.handle_cmd(&mut qtui);
         let _ = qtui.show_msg(format!("Got input string {}", iput));
         if iput == "exit" {
             break;
@@ -28,6 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     qvault_log::log_info("Exiting from qvault session", format_args!(""));
     qtui.shutdown();
+    qvault_log::shutdown_log();
 
     Ok(())
 }

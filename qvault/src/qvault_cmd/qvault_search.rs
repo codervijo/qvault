@@ -127,7 +127,7 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
         });
     }
 
-    log_info("Doing brave search for query >>", format_args!("{}", query));
+    //log_info("Doing brave search for query >>", format_args!("{}", query));
     let mut api_key = env::var("BRAVE_SEARCH_API_KEY").ok();
 
     if api_key.is_none() {
@@ -173,7 +173,7 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
 
                             // Attempt to parse as JSON
                             match serde_json::from_str::<serde_json::Value>(&body) {
-                                Ok(json) => log_info("Parsed JSON: ",format_args!("{}", json)),
+                                Ok(json) => log_info("Parsed JSON: ",format_args!("abc {}", json)),
                                 Err(err) => eprintln!("Failed to parse JSON: {}", err),
                             }
 
@@ -182,7 +182,7 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
                                 Ok(result) => {
                                     //println!("Parsed SearchResult: {:#?}", result);
                                     //log_info("Parsed SearchResult:", &[result]);
-                                    log_info("Parsed SearchResult: {}", format_args!("{}", result));
+                                    //log_info("Parsed SearchResult: {}", format_args!("def {}", result));
                                     Ok(result)
                                 }
                                 Err(json_err) => {
