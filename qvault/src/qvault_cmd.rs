@@ -83,7 +83,7 @@ pub fn handle_set(_args: &[String], term: &mut QvaultTerminal) {
 }
 
 pub fn handle_ai(args: &[String], term: &mut QvaultTerminal) {
-    term.show_msg("AI command invoked".to_string());
+    term.show_output_title("AI command invoked".to_string());
     qvault_log::log_info("AI ommand executed:", format_args!("{}", args.join(", ")));
 }
 
