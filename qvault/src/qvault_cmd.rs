@@ -86,6 +86,7 @@ impl QvaultCmdName {
 }
 
 pub fn handle_search(args: &[String], term: &mut QvaultTerminal) {
+    term.clear_output_screen();
     //term.show_msg(format!("Searching for args: {:?}", args));
     qvault_log::log_info("Searching for args: ", format_args!("{}", args.join(", ")));
     if !args.is_empty() {
@@ -107,6 +108,7 @@ pub fn handle_exit(_args: &[String], term: &mut QvaultTerminal) {
 
 pub fn handle_help(_args: &[String], term: &mut QvaultTerminal) {
     let mut hstrs: Vec<String> = vec![];
+    term.clear_output_screen();
     term.show_output_title("Help".to_string());
     //term.tui_draw_rectangle(5,5,60,15);
     for cmd in QvaultCmdName::iter() {
@@ -119,14 +121,17 @@ pub fn handle_help(_args: &[String], term: &mut QvaultTerminal) {
 }
 
 pub fn handle_history(_args: &[String], term: &mut QvaultTerminal) {
+    term.clear_output_screen();
     term.show_output_title("History command".to_string());
 }
 
 pub fn handle_set(_args: &[String], term: &mut QvaultTerminal) {
+    term.clear_output_screen();
     term.show_output_title("Set command".to_string());
 }
 
 pub fn handle_ai(args: &[String], term: &mut QvaultTerminal) {
+    term.clear_output_screen();
     term.show_output_title("AI Response".to_string());
     qvault_log::log_info("AI command executed:", format_args!("{}", args.join(", ")));
     qvault_log::log_info("Searching for args: ", format_args!("{}", args.join(", ")));
