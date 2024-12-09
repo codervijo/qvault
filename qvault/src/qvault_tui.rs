@@ -54,16 +54,26 @@ impl QvaultTerminal {
             title
         };
 
+        // Get terminal size
+        let (term_width, _) = termion::terminal_size().unwrap();
+
+        // Title decorations and formatting
+        let decoration = "\u{1F340}\u{1F340}\u{1F340}\u{1F340}\u{1F340}";
+        let full_title = format!("{} {} {}", decoration, title.to_uppercase(), decoration);
+
+        // Calculate the starting column to center the title
+        let start_col = (term_width as usize - full_title.len()) / 2;
+
+        // Print the title at the centered position
         writeln!(
             self.terminal,
-            "{}{}{}{}{}{}",
-            cursor::Goto(1, self.output_row + 5), // Move cursor to the correct position
-            "\x1b[1m",                            // Start bold text
-            "\u{1F340}\u{1F340}\u{1F340}\u{1F340}\u{1F340} ", // Left border decoration
-            title.to_uppercase(),                 // Title in uppercase
-            " \u{1F340}\u{1F340}\u{1F340}\u{1F340}\u{1F340}", // Right border decoration
-            "\x1b[0m"                             // Reset text formatting
-        )?;
+            "{}{}{}{}",
+            cursor::Goto(start_col as u16, self.output_row + 1), // Move cursor to centered position
+            "\x1b[1m",                                           // Start bold text
+            full_title,                                          // Full title with decorations
+            "\x1b[0m"                                            // Reset text formatting
+        ).unwrap();
+
         self.terminal.flush()?;
 
         Ok(())
@@ -79,6 +89,14 @@ impl QvaultTerminal {
         )?;
         self.terminal.flush()?;
 
+        Ok(())
+    }
+
+    fn draw_horizontal_bar(&mut self, width: u16) -> Result<(), Box<dyn std::error::Error>> {
+        write!(self.terminal, "\x1b[48;5;12m")?; // Set background to light blue
+        for _ in 0..width {
+            write!(self.terminal, " ")?; // Fill the line with spaces
+        }
         Ok(())
     }
 
@@ -116,6 +134,36 @@ impl QvaultTerminal {
         )?;
 
         self.flush()?;
+
+        Ok(())
+    }
+
+    pub fn clear_output_screen(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        let (width, height) = termion::terminal_size()?; // Get terminal size
+        self.hbar_row = height - 1; // Horizontal bar at the second-to-last row
+        self.input_row = self.hbar_row + 1; // Input row below the bar
+
+        // Clear the screen and move cursor to the horizontal bar row
+        write!(
+            self.terminal,
+            "{}{}",
+            clear::All,
+            cursor::Goto(1, self.hbar_row)
+        )?;
+
+        // Draw the horizontal bar with a blue background
+        self.draw_horizontal_bar(width)?;
+
+        // Reset terminal colors and position cursor for input
+        write!(
+            self.terminal,
+            "{}{}{}",
+            "\x1b[0m",             // Reset color to default
+            cursor::Show,          // Show the cursor
+            cursor::Goto(1, self.input_row) // Move to input row
+        )?;
+
+        self.flush()?; // Ensure everything is written to the terminal
 
         Ok(())
     }
@@ -164,6 +212,58 @@ impl QvaultTerminal {
 
         self.terminal.flush()?;
         Ok(())
+    }
+
+    fn tui_draw_rectangle(&mut self, x: u16, y: u16, width: u16, height: u16) {
+        // Unicode codes for box-drawing characters
+        let horizontal = "\u{2500}"; // ─
+        let vertical = "\u{2502}";   // │
+        let top_left = "\u{250C}";   // ┌
+        let top_right = "\u{2510}";  // ┐
+        let bottom_left = "\u{2514}";// └
+        let bottom_right = "\u{2518}";// ┘
+
+        // Draw top and bottom borders
+        for i in 0..width {
+            write!(self.terminal, "{}{}", cursor::Goto(x + i, y), horizontal).unwrap(); // Top border
+            write!(self.terminal, "{}{}", cursor::Goto(x + i, y + height - 1), horizontal).unwrap(); // Bottom border
+        }
+
+        // Draw left and right borders
+        for i in 0..height {
+            write!(self.terminal, "{}{}", cursor::Goto(x, y + i), vertical).unwrap(); // Left border
+            write!(self.terminal, "{}{}", cursor::Goto(x + width - 1, y + i), vertical).unwrap(); // Right border
+        }
+
+        // Draw corners
+        write!(self.terminal, "{}{}", cursor::Goto(x, y), top_left).unwrap(); // Top-left corner
+        write!(self.terminal, "{}{}", cursor::Goto(x + width - 1, y), top_right).unwrap(); // Top-right corner
+        write!(self.terminal, "{}{}", cursor::Goto(x, y + height - 1), bottom_left).unwrap(); // Bottom-left corner
+        write!(self.terminal, "{}{}", cursor::Goto(x + width - 1, y + height - 1), bottom_right).unwrap(); // Bottom-right corner
+
+        self.terminal.flush().unwrap();
+    }
+
+    pub fn tui_show_help(&mut self, help: Vec<String>) {
+        // Get terminal size
+        let (term_width, term_height) = termion::terminal_size().unwrap();
+
+        // Box dimensions
+        let box_width = 60;
+        let box_height = 15;
+
+        // Calculate top-left corner to center the box
+        let x = (term_width - box_width) / 2;
+        let y = (term_height - box_height) / 2;
+
+        // Draw the rectangle
+        self.tui_draw_rectangle(x, y, box_width, box_height);
+        let mut line = 1;
+
+        for s in help {
+            writeln!(self.terminal, "{}{}", cursor::Goto(x+5, y+line+3), s);
+            line += 1;
+        }
     }
 
     pub fn tui_get_input(&mut self) -> Result<String, Box<dyn std::error::Error>> {

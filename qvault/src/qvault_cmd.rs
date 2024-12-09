@@ -3,11 +3,13 @@ use crate::qvault_log;
 use serde::{Serialize, Deserialize};
 use std::fmt;
 use std::str::FromStr;
+use strum::EnumIter;
+use strum::IntoEnumIterator;
 
 mod qvault_search;
 mod qvault_ai;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, EnumIter)]
 pub enum QvaultCmdName {
     Error,
     Help,
@@ -16,6 +18,21 @@ pub enum QvaultCmdName {
     Search,
     Set,
     Ai,
+}
+
+impl QvaultCmdName {
+    fn get_help(&self) -> String {
+        let name = match self {
+            QvaultCmdName::Help => "Show this help message",
+            QvaultCmdName::History => "History of commands",
+            QvaultCmdName::Exit => "Exit from Qvault",
+            QvaultCmdName::Search => "Search using Brave Search",
+            QvaultCmdName::Set => "Settings for Qvault",
+            QvaultCmdName::Ai => "AI lookup using OpenAI",
+            QvaultCmdName::Error => "Error(internal only)",
+        };
+        name.to_string()
+    }
 }
 
 impl FromStr for QvaultCmdName {
@@ -53,8 +70,24 @@ impl fmt::Display for QvaultCmdName {
     }
 }
 
+impl QvaultCmdName {
+    fn get_cmd(&self) -> String {
+        let name = match self {
+            QvaultCmdName::Help => "/help",
+            QvaultCmdName::History => "/history",
+            QvaultCmdName::Exit => "/exit",
+            QvaultCmdName::Search => "/search",
+            QvaultCmdName::Set => "/set",
+            QvaultCmdName::Ai => "/ai",
+            QvaultCmdName::Error => "Error",
+        };
+        name.to_string()
+    }
+}
+
 pub fn handle_search(args: &[String], term: &mut QvaultTerminal) {
-    term.show_msg(format!("Searching for args: {:?}", args));
+    //term.show_msg(format!("Searching for args: {:?}", args));
+    qvault_log::log_info("Searching for args: ", format_args!("{}", args.join(", ")));
     if !args.is_empty() {
         match qvault_search::search_brave(&args[0]) {
             Ok(result) => {
@@ -73,7 +106,16 @@ pub fn handle_exit(_args: &[String], term: &mut QvaultTerminal) {
 }
 
 pub fn handle_help(_args: &[String], term: &mut QvaultTerminal) {
+    let mut hstrs: Vec<String> = vec![];
     term.show_output_title("Help".to_string());
+    //term.tui_draw_rectangle(5,5,60,15);
+    for cmd in QvaultCmdName::iter() {
+        //term.show_msg(cmd.get_help());
+        qvault_log::log_info("CMD: ", format_args!("{} - {}", cmd.get_cmd(), cmd.get_help()));
+        hstrs.push(format!("{} - {}", cmd.get_cmd(), cmd.get_help()));
+    }
+
+    term.tui_show_help(hstrs);
 }
 
 pub fn handle_history(_args: &[String], term: &mut QvaultTerminal) {
