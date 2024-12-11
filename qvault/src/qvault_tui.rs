@@ -57,7 +57,12 @@ impl QvaultTerminal {
         let full_title = format!("{} {} {}", decoration, title.to_uppercase(), decoration);
 
         // Calculate the starting column to center the title
-        let start_col = (term_width as usize - full_title.len()) / 2;
+        let start_col;
+        if full_title.len() < term_width.into() {
+            start_col = (term_width as usize - full_title.len()) / 2;
+        } else {
+            start_col = 1;
+        }
 
         // Print the title at the centered position
         writeln!(
