@@ -18,10 +18,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         qtui.show_prompt()?;
         let iput = qtui.tui_get_input()?;
         qvault_log::log_info("Got input from User >>", format_args!("{}", iput));
-        let qcmd = qvault_cmd::QvaultCmd::from_input(&iput)?;
-        qcmd.clone().log_it();
-        qcmd.handle_cmd(&mut qtui);
-        //let _ = qtui.show_msg(format!("Got input string {}", iput));
+        let qcmd =
+        match qvault_cmd::QvaultCmd::from_input(&iput){
+            Ok(qcmd) => {
+                qcmd.clone().log_it();
+                qcmd.handle_cmd(&mut qtui);
+            }
+            Err(e) => {
+                qvault_log::log_info("Error parsing user input: ", format_args!("{}", iput));
+                continue;
+            }
+        };
+
         if iput == "exit" {
             break;
         }
