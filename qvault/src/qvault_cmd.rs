@@ -94,6 +94,7 @@ pub fn handle_search(args: &[String], term: &mut QvaultTerminal) {
             Ok(result) => {
                 term.show_output_title(result.title().to_string());
                 term.show_output_message(1, result.snippet().to_string());
+                term.show_output_url(result.url());
             }
             Err(err) => {
                 term.show_msg(format!("Search failed: {}", err));

@@ -28,11 +28,6 @@ impl QvaultTerminal {
         })
     }
 
-    // Getter for the terminal
-    //pub fn get_terminal(&mut self) -> RawTerminal<io::Stdout> {
-    //    self.terminal
-    //}
-
     pub fn flush(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         //self.terminal.show_cursor()?; // Ensure cursor is shown when shutting down
         let _ = self.terminal.flush();
@@ -90,6 +85,25 @@ impl QvaultTerminal {
         self.terminal.flush()?;
 
         Ok(())
+    }
+
+    pub fn show_output_url(&mut self, url: &str) {
+        // Move the cursor to the specified position
+        write!(self.terminal, "{}", cursor::Goto(1, self.output_row+15)).unwrap();
+
+        // Use the OSC 8 escape sequence to create a clickable hyperlink
+        // Format: \x1b]8;;<URL>\x1b\\<text>\x1b]8;;\x1b\\
+        let text = format!("{} URL : {}", "\u{1F7E2}", url);
+        write!(
+            self.terminal,
+            "\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\",
+            url,        // The actual URL
+            text // The text to display
+        )
+        .unwrap();
+
+        // Flush the terminal to ensure the output is written
+        self.terminal.flush().unwrap();
     }
 
     fn draw_horizontal_bar(&mut self, width: u16) -> Result<(), Box<dyn std::error::Error>> {

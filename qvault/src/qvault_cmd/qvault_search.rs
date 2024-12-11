@@ -68,11 +68,12 @@ impl SearchResult {
         ""
     }
 
-    /*
     pub fn url(&self) -> &str {
-        &self.url
+        if let Some(items) = &self.items {
+            return &items[0].url;
+        }
+        &"https://google.com"
     }
-    */
 
     pub fn snippet(&self) -> &str {
         if let Some(items) = &self.items {
@@ -173,10 +174,34 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
 
                             // Attempt to parse as JSON
                             match serde_json::from_str::<serde_json::Value>(&body) {
-                                Ok(json) => log_info("Parsed JSON: ",format_args!("abc {}", json)),
-                                Err(err) => eprintln!("Failed to parse JSON: {}", err),
+                                Ok(json) => {
+                                    log_info("Parsed JSON: ",format_args!("abc {}", json));
+
+                                    // Navigate to the "web.results" array
+                                    let results = json["web"]["results"].as_array().ok_or("Invalid results format")?;
+                                    log_info("VCVC Found results in JSON number:", format_args!("{}", results.len()));
+                                    log_info("VCVC Titile of first result ", format_args!("{}", results[0]["title"]));
+
+                                    // Perform operations to extract the required data from `json`.
+                                    let search_result = SearchResult {
+                                        error: None, // Populate fields appropriately
+                                        status: Some(200), // Example data
+                                        items: Some(vec![SearchItem {
+                                            title: results[0]["title"].to_string(),
+                                            url: results[0]["url"].to_string(),
+                                        }]),
+                                    };
+
+                                    Ok(search_result) // Return the constructed `SearchResult`
+
+                                }
+                                Err(err) => {
+                                    eprintln!("Failed to parse JSON: {}", err);
+                                    Err(format!("JSON parsing error: {}", err)) // Return an error wrapped in `Err`
+                                }
                             }
 
+/*
                             // Attempt to Parse JSON
                             match serde_json::from_str::<SearchResult>(&body) {
                                 Ok(result) => {
@@ -202,6 +227,7 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
                                     Err("Failed to parse response body.".to_string())
                                 }
                             }
+*/
                         }
                         Err(read_err) => {
                             eprintln!("Failed to read response body: {}", read_err);
