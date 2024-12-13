@@ -95,23 +95,6 @@ impl SearchErrorResponse {
 }
 
 /*
-// Mocking the Brave search function; replace with actual implementation
-pub fn search_brave(query: &str) -> Result<SearchResult, String> {
-    if query.is_empty() {
-        return Err("Query parameter 'q' is required.".to_string());
-    }
-
-    Ok(
-        SearchResult {
-            title: "Example Result".to_string(),
-            url: "https://example.com".to_string(),
-            snippet: "This is a snippet from the search result.".to_string(),
-        },
-    )
-}
-*/
-
-/*
  * Command equivalent
  *  curl -s --compressed "https://api.search.brave.com/res/v1/web/search?q=brave+search"\
     -H "Accept: application/json"\
