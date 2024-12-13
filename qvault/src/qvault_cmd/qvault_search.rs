@@ -81,6 +81,13 @@ impl SearchResult {
         }
         "This is a snippet from the search result"
     }
+
+    pub fn count(&self) -> usize {
+        if let Some(items) = &self.items {
+            return items.len();
+        }
+        0
+    }
 }
 
 #[derive(Serialize, Debug)]
@@ -163,7 +170,7 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
                                     // Navigate to the "web.results" array
                                     let results = json["web"]["results"].as_array().ok_or("Invalid results format")?;
                                     log_info("VCVC Found results in JSON number:", format_args!("{}", results.len()));
-                                    log_info("VCVC Titile of first result ", format_args!("{}", results[0]["title"]));
+                                    log_info("VCVC Title of first result ", format_args!("{}", results[0]["title"]));
 
                                     // Perform operations to extract the required data from `json`.
                                     let search_result = SearchResult {

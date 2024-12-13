@@ -1,6 +1,6 @@
 use std::io::{self, Write};
 use termion::raw::{IntoRawMode, RawTerminal};
-use termion::{clear, cursor};
+use termion::{clear, cursor, color};
 use termion::{
     event::{Event, Key},
     input::TermRead,
@@ -109,6 +109,46 @@ impl QvaultTerminal {
 
         // Flush the terminal to ensure the output is written
         self.terminal.flush().unwrap();
+    }
+
+
+    pub fn show_output_nav(&mut self, num_results: usize) -> Result<(), Box<dyn std::error::Error>> {
+        // Safely get terminal dimensions
+        let (width, height) = termion::terminal_size()?;
+
+        // Center the "num Search Results"
+        let results_text = format!("{num_results} Search Results");
+        let center_x = (width / 2) as u16;
+        //let row = (height / 2) as u16;
+        let text_x = center_x.saturating_sub((results_text.len() / 2) as u16); // Safe subtraction
+
+        // Print the centered "num Search Results"
+        write!(
+            self.terminal,
+            "{}{}{}",
+            cursor::Goto(text_x, self.hbar_row-2),
+            color::Fg(color::Blue),
+            results_text
+        )?;
+
+        if num_results > 1 {
+            // Print the "Next Page →" aligned to the right
+            let right_text = "Next Page →";
+            let right_x = width.saturating_sub(right_text.len() as u16);
+            write!(
+                self.terminal,
+                "{}{}{}",
+                cursor::Goto(right_x, self.hbar_row-2),
+                color::Fg(color::Green),
+                right_text
+            )?;
+
+            // Reset the cursor to bottom left
+            write!(self.terminal, "{}", cursor::Goto(1, height))?;
+        }
+        self.terminal.flush()?;
+
+        Ok(())
     }
 
     fn draw_horizontal_bar(&mut self, width: u16) -> Result<(), Box<dyn std::error::Error>> {
