@@ -402,9 +402,11 @@ impl QvaultTerminal {
         self.draw_box(18, 5, 33, 3, active_field == 0)?;
         write!(
             self.terminal,
-            "{}{}Brave API Key:{}",
+            "{}{}{}Brave API Key:{}{}",
             cursor::Goto(19, 5),
             Self::style(if active_field == 0 { "highlight" } else { "dim" }),
+            Self::style("cyan"),
+            Self::style("reset"),
             Self::style("reset"),
         )?;
         write!(
@@ -418,9 +420,11 @@ impl QvaultTerminal {
         self.draw_box(18, 9, 33, 3, active_field == 1)?;
         write!(
             self.terminal,
-            "{}{}OpenAI API Key:{}",
+            "{}{}{}OpenAI API Key:{}{}",
             cursor::Goto(19, 9),
             Self::style(if active_field == 1 { "highlight" } else { "dim" }),
+            Self::style("cyan"),
+            Self::style("reset"),
             Self::style("reset"),
         )?;
         write!(
@@ -433,18 +437,22 @@ impl QvaultTerminal {
         // Cancel button
         write!(
             self.terminal,
-            "{}{}[ Cancel ]{}",
+            "{}{}[ {}Cancel{} ]{}",
             cursor::Goto(10, 15),
             Self::style(if active_field == 2 { "highlight" } else { "dim" }),
+            Self::style("yellow"),
+            Self::style("reset"),
             Self::style("reset")
         )?;
 
         // Submit button
         write!(
             self.terminal,
-            "{}{}[ Submit ]{}",
+            "{}{}[ {}Submit{} ]{}",
             cursor::Goto(45, 15),
             Self::style(if active_field == 3 { "highlight" } else { "dim" }),
+            Self::style("green"),
+            Self::style("reset"),
             Self::style("reset")
         )?;
 
