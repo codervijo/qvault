@@ -129,7 +129,8 @@ pub fn handle_history(_args: &[String], term: &mut QvaultTerminal) {
 
 pub fn handle_set(_args: &[String], term: &mut QvaultTerminal) {
     term.clear_output_screen();
-    term.show_output_title("Set command".to_string());
+    term.show_output_title("QVault Settings".to_string());
+    term.tui_show_settings();
 }
 
 pub fn handle_ai(args: &[String], term: &mut QvaultTerminal) {

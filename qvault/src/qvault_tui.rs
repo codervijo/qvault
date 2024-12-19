@@ -303,6 +303,224 @@ impl QvaultTerminal {
         self.terminal.flush().unwrap();
     }
 
+    /// Draw a rectangular box on the terminal
+    fn draw_box(
+        &mut self,
+        x: u16,
+        y: u16,
+        width: u16,
+        height: u16,
+        is_active: bool,
+    ) -> io::Result<()> {
+        // Determine style for the box border
+        let border_style = if is_active {
+            Self::style("highlight") // Highlighted (reverse video)
+        } else {
+            Self::style("reset") // Reset (normal)
+        };
+
+        // Top border
+        write!(
+            self.terminal,
+            "{}{}{}┌{}┐{}",
+            cursor::Goto(x, y),
+            border_style,
+            Self::reset_code(), // Reset to avoid affecting the content
+            "─".repeat((width - 2) as usize),
+            Self::reset_code(),
+        )?;
+
+        // Middle section
+        for i in 1..(height - 1) {
+            write!(
+                self.terminal,
+                "{}{}{}│{}│{}",
+                cursor::Goto(x, y + i),
+                border_style,
+                Self::reset_code(),
+                " ".repeat((width - 2) as usize),
+                Self::reset_code(),
+            )?;
+        }
+
+        // Bottom border
+        write!(
+            self.terminal,
+            "{}{}{}└{}┘{}",
+            cursor::Goto(x, y + height - 1),
+            border_style,
+            Self::reset_code(),
+            "─".repeat((width - 2) as usize),
+            Self::reset_code(),
+        )?;
+
+        Ok(())
+    }
+
+    /// Resets terminal styles
+    fn reset_code() -> &'static str {
+        "\x1b[0m"
+    }
+
+    /// Returns the ANSI color code string
+    fn style(style: &str) -> &'static str {
+        match style {
+            "cyan" => "\x1b[36m",
+            "yellow" => "\x1b[33m",
+            "blue_bg" => "\x1b[44m",
+            "green" => "\x1b[32m",
+            "red" => "\x1b[31m",
+            "bold" => "\x1b[1m",           // Bold text
+            "dim" => "\x1b[2m",            // Dim text
+            "highlight" => "\x1b[7m",      // Reverse video (background/foreground swap)
+            "reset" => "\x1b[0m",          // Reset all styles
+            _ => "\x1b[0m",                // Default to reset
+        }
+    }
+
+    fn render_ui(
+        &mut self,
+        username: &str,
+        password: &str,
+        active_field: usize,
+    ) -> io::Result<()> {
+        //write!(self.terminal, "{}{}", clear::All, cursor::Goto(1, 1))?;
+        //self.clear_output_screen();
+
+        // Title
+        /*
+        write!(
+            self.terminal,
+            "{}{}Login Form{}",
+            Self::style("bold"),
+            cursor::Goto(10, 1),
+            Self::style("reset")
+        )?;
+        */
+
+        // Username field
+        self.draw_box(18, 5, 33, 3, active_field == 0)?;
+        write!(
+            self.terminal,
+            "{}{}Brave API Key:{}",
+            cursor::Goto(19, 5),
+            Self::style(if active_field == 0 { "highlight" } else { "dim" }),
+            Self::style("reset"),
+        )?;
+        write!(
+            self.terminal,
+            "{}{: <20}",
+            cursor::Goto(19, 6),
+            username,
+        )?;
+
+        // Password field
+        self.draw_box(18, 9, 33, 3, active_field == 1)?;
+        write!(
+            self.terminal,
+            "{}{}OpenAI API Key:{}",
+            cursor::Goto(19, 9),
+            Self::style(if active_field == 1 { "highlight" } else { "dim" }),
+            Self::style("reset"),
+        )?;
+        write!(
+            self.terminal,
+            "{}{: <20}",
+            cursor::Goto(19, 10),
+            password
+        )?;
+
+        // Cancel button
+        write!(
+            self.terminal,
+            "{}{}[ Cancel ]{}",
+            cursor::Goto(10, 15),
+            Self::style(if active_field == 2 { "highlight" } else { "dim" }),
+            Self::style("reset")
+        )?;
+
+        // Submit button
+        write!(
+            self.terminal,
+            "{}{}[ Submit ]{}",
+            cursor::Goto(45, 15),
+            Self::style(if active_field == 3 { "highlight" } else { "dim" }),
+            Self::style("reset")
+        )?;
+
+        self.terminal.flush()
+    }
+
+    pub fn tui_show_settings(&mut self) -> io::Result<()> {
+        // Set up raw mode for terminal
+        let stdin = io::stdin();
+
+        // Input fields and states
+        let mut username = String::new();
+        let mut password = String::new();
+        let mut active_field = 0; // 0: username, 1: password, 2: cancel, 3: submit
+
+        self.render_ui(&username, &password, active_field)?;
+
+        // Input loop
+        for key in stdin.keys() {
+            match key? {
+                Key::Char('\t') => {
+                    // Tab to switch fields
+                    active_field = (active_field + 1) % 4;
+                }
+                Key::Char('\n') => {
+                    // Enter to submit
+                    if active_field == 3 {
+                        write!(
+                            self.terminal,
+                            "{}{}\nSubmitted! Username: {}, Password: {}\nPress any key to exit.",
+                            cursor::Goto(1, 15),
+                            clear::AfterCursor,
+                            username,
+                            password
+                        )?;
+                        self.terminal.flush()?;
+                        break;
+                    }
+
+                    // Enter to cancel
+                    if active_field == 2 {
+                        write!(
+                            self.terminal,
+                            "{}{}\nCancelled!!",
+                            cursor::Goto(1, 15),
+                            clear::AfterCursor
+                        )?;
+                        self.terminal.flush()?;
+                        break;
+                    }
+                }
+                Key::Backspace => {
+                    // Backspace for editing
+                    if active_field == 0 && !username.is_empty() {
+                        username.pop();
+                    } else if active_field == 1 && !password.is_empty() {
+                        password.pop();
+                    }
+                }
+                Key::Char(c) => {
+                    // Append characters to the active field
+                    if active_field == 0 {
+                        username.push(c);
+                    } else if active_field == 1 {
+                        password.push(c);
+                    }
+                }
+                Key::Esc => break, // Exit on Esc key
+                _ => {}
+            }
+            self.render_ui(&username, &password, active_field)?;
+        }
+
+        Ok(())
+    }
+
     pub fn tui_show_help(&mut self, help: Vec<String>) {
         // Get terminal size
         let (term_width, term_height) = termion::terminal_size().unwrap();
