@@ -303,60 +303,6 @@ impl QvaultTerminal {
         self.terminal.flush().unwrap();
     }
 
-    /// Draw a rectangular box on the terminal
-    fn draw_box(
-        &mut self,
-        x: u16,
-        y: u16,
-        width: u16,
-        height: u16,
-        is_active: bool,
-    ) -> io::Result<()> {
-        // Determine style for the box border
-        let border_style = if is_active {
-            Self::style("highlight") // Highlighted (reverse video)
-        } else {
-            Self::style("reset") // Reset (normal)
-        };
-
-        // Top border
-        write!(
-            self.terminal,
-            "{}{}{}┌{}┐{}",
-            cursor::Goto(x, y),
-            border_style,
-            Self::reset_code(), // Reset to avoid affecting the content
-            "─".repeat((width - 2) as usize),
-            Self::reset_code(),
-        )?;
-
-        // Middle section
-        for i in 1..(height - 1) {
-            write!(
-                self.terminal,
-                "{}{}{}│{}│{}",
-                cursor::Goto(x, y + i),
-                border_style,
-                Self::reset_code(),
-                " ".repeat((width - 2) as usize),
-                Self::reset_code(),
-            )?;
-        }
-
-        // Bottom border
-        write!(
-            self.terminal,
-            "{}{}{}└{}┘{}",
-            cursor::Goto(x, y + height - 1),
-            border_style,
-            Self::reset_code(),
-            "─".repeat((width - 2) as usize),
-            Self::reset_code(),
-        )?;
-
-        Ok(())
-    }
-
     /// Resets terminal styles
     fn reset_code() -> &'static str {
         "\x1b[0m"
@@ -399,7 +345,8 @@ impl QvaultTerminal {
         */
 
         // Username field
-        self.draw_box(18, 5, 33, 3, active_field == 0)?;
+        //self.draw_box(18, 5, 33, 3, active_field == 0)?;
+        self.tui_draw_box(18, 5, 33, 3);
         write!(
             self.terminal,
             "{}{}{}Brave API Key:{}{}",
@@ -417,7 +364,8 @@ impl QvaultTerminal {
         )?;
 
         // Password field
-        self.draw_box(18, 9, 33, 3, active_field == 1)?;
+        //self.draw_box(18, 9, 33, 3, active_field == 1)?;
+        self.tui_draw_box(18, 9, 33, 3);
         write!(
             self.terminal,
             "{}{}{}OpenAI API Key:{}{}",
