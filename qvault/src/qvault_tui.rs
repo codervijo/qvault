@@ -273,7 +273,7 @@ impl QvaultTerminal {
         Ok(())
     }
 
-    fn tui_draw_rectangle(&mut self, x: u16, y: u16, width: u16, height: u16) {
+    fn tui_draw_box(&mut self, x: u16, y: u16, width: u16, height: u16) {
         // Unicode codes for box-drawing characters
         let horizontal = "\u{2500}"; // ─
         let vertical = "\u{2502}";   // │
@@ -542,7 +542,7 @@ impl QvaultTerminal {
         let y = (term_height - box_height) / 2;
 
         // Draw the rectangle
-        self.tui_draw_rectangle(x, y, box_width, box_height);
+        self.tui_draw_box(x, y, box_width, box_height);
         let mut line = 1;
 
         for s in help {
