@@ -93,11 +93,12 @@ pub fn handle_search(args: &[String], term: &mut QvaultTerminal) {
         match qvault_search::search_brave(&args[0]) {
             Ok(mut result) => {
                 loop {
+                    term.clear_output_screen();
                     term.show_output_title(result.title().to_string());
                     term.show_output_message(1, result.snippet().to_string());
                     term.show_output_url(result.url());
                     term.show_output_nav(result.count());
-                    if let Ok(c) = term.search_output_navigate() {
+                    if let Ok(c) = term.navigate_search_output() {
                         if c == 0 {
                             break;
                         }

@@ -157,7 +157,7 @@ impl QvaultTerminal {
         Ok(())
     }
 
-    pub fn search_output_navigate(&mut self) -> Result<i16, Box<dyn std::error::Error>> {
+    pub fn navigate_search_output(&mut self) -> Result<i16, Box<dyn std::error::Error>> {
         let mut count = 0;
         // Start reading events from the terminal
         for event in io::stdin().events() {
