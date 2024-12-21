@@ -4,6 +4,7 @@ use std::env;
 use std::fs;
 use dotenv::dotenv;
 use std::fmt;
+use serde_json::Value;
 
 use crate::qvault_log;
 use crate::qvault_log::log_info;
@@ -20,6 +21,61 @@ struct SearchItem {
     title: String,
     url: String,
 }
+
+impl SearchItem {
+    // Constructor method for the struct
+    fn new(title: String, url: String) -> Self {
+        Self {
+            title: title,
+            url: url,
+        }
+    }
+
+    // A method to display the SearchItem
+    fn display(&self) {
+        println!("Title: {}, Url: {}", self.title, self.url);
+    }
+}
+
+// "collection" struct to hold multiple persons
+struct SearchItemList {
+    list: Vec<SearchItem>,
+}
+
+impl SearchItemList {
+    // Constructor for the list
+    fn new() -> Self {
+        Self { list: Vec::new() }
+    }
+
+    // Method to add a person to the list
+    fn add_search_item(&mut self, title: Value, url: Value) {
+        let si = SearchItem::new(title.to_string(), url.to_string());
+        self.list.push(si);
+    }
+
+    // Method to display all people
+    fn display_all(&self) {
+        for item in &self.list {
+            item.display();
+        }
+    }
+}
+
+/*
+fn notmain() {
+    // Create a PeopleManager
+    let mut manager = PeopleManager::new();
+
+    // Add people using OOP-style methods
+    manager.add_person("Alice", 30);
+    manager.add_person("Bob", 25);
+    manager.add_person("Charlie", 40);
+
+    // Display all people
+    manager.display_all();
+}
+*/
 
 /*
 #[derive(Serialize, Deserialize, Debug)]
@@ -172,14 +228,16 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
                                     log_info("VCVC Found results in JSON number:", format_args!("{}", results.len()));
                                     log_info("VCVC Title of first result ", format_args!("{}", results[0]["title"]));
 
+                                    let mut silist = SearchItemList::new();
+                                    for res in results {
+                                        silist.add_search_item(res["title"].clone(), res["url"].clone());
+                                        log_info("VCVC Res: ", format_args!("title:{}", res["title"]));
+                                    }
                                     // Perform operations to extract the required data from `json`.
                                     let search_result = SearchResult {
                                         error: None, // Populate fields appropriately
                                         status: Some(200), // Example data
-                                        items: Some(vec![SearchItem {
-                                            title: results[0]["title"].to_string(),
-                                            url: results[0]["url"].to_string(),
-                                        }]),
+                                        items: Some(silist.list),
                                     };
 
                                     Ok(search_result) // Return the constructed `SearchResult`
