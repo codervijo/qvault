@@ -140,6 +140,16 @@ impl SearchResult {
         }
         self.index
     }
+
+    pub fn prev_item(&mut self) -> usize {
+        if let Some(items) = &self.items {
+            if self.index == 0 {
+                self.index = items.len();
+            }
+            self.index -= 1;
+        }
+        self.index
+    }
 }
 
 #[derive(Serialize, Debug)]

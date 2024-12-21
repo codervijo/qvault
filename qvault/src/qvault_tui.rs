@@ -141,11 +141,12 @@ impl QvaultTerminal {
             let right_x = width.saturating_sub(right_text.len() as u16);
             write!(
                 self.terminal,
-                "{}{}{}{}",
+                "{}{}{}{}{}",
                 cursor::Goto(right_x, self.hbar_row-2),
                 color::Fg(color::Green),
                 Self::style("highlight"),
-                right_text
+                right_text,
+                Self::style("reset")
             )?;
 
             // Move cursor to navigate search output
@@ -156,21 +157,34 @@ impl QvaultTerminal {
         Ok(())
     }
 
-    pub fn search_output_navigate(&mut self) -> Result<u16, Box<dyn std::error::Error>> {
+    pub fn search_output_navigate(&mut self) -> Result<i16, Box<dyn std::error::Error>> {
         let mut count = 0;
         // Start reading events from the terminal
         for event in io::stdin().events() {
             match event? {
                 Event::Key(Key::Char('\n')) => {
                     count += 1;
-                    break; // Stop at Enter key
+                    break;
+                }
+                Event::Key(Key::Right) => {
+                    count += 1;
+                    break;
+                }
+                Event::Key(Key::Down) => {
+                    count += 1;
+                    break;
                 }
                 Event::Key(Key::Char('\t')) => {
                     count = 0;
-                    break; // Stop at Tab key
+                    break;
                 }
                 Event::Key(Key::Backspace) => {
-                    // Go to Previous Result
+                    count -= 1;
+                    break;
+                }
+                Event::Key(Key::Left) => {
+                    count -= 1;
+                    break;
                 }
                 _ => {}
             }

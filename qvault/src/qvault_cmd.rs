@@ -101,7 +101,11 @@ pub fn handle_search(args: &[String], term: &mut QvaultTerminal) {
                         if c == 0 {
                             break;
                         }
-                        result.next_item();
+                        if c > 0 {
+                            result.next_item();
+                        } else {
+                            result.prev_item();
+                        }
                     } else {
                         break;
                     }
