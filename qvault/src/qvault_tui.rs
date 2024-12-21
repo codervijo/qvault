@@ -10,6 +10,8 @@ pub struct QvaultTerminal {
     terminal: RawTerminal<io::Stdout>,
     input_row: u16,
     input_col: u16,
+    last_input_row: u16,
+    last_input_col: u16,
     output_row: u16,
     hbar_row: u16,
 }
@@ -23,6 +25,8 @@ impl QvaultTerminal {
             terminal,
             input_row: 1,
             input_col: 1,
+            last_input_col: 0,
+            last_input_row: 0,
             output_row: 1,
             hbar_row: 1,
         })
@@ -137,18 +141,43 @@ impl QvaultTerminal {
             let right_x = width.saturating_sub(right_text.len() as u16);
             write!(
                 self.terminal,
-                "{}{}{}",
+                "{}{}{}{}",
                 cursor::Goto(right_x, self.hbar_row-2),
                 color::Fg(color::Green),
+                Self::style("highlight"),
                 right_text
             )?;
 
-            // Reset the cursor to bottom left
-            write!(self.terminal, "{}", cursor::Goto(1, height))?;
+            // Move cursor to navigate search output
+            write!(self.terminal, "{}", cursor::Goto(right_x, self.hbar_row-2))?;
         }
         self.terminal.flush()?;
 
         Ok(())
+    }
+
+    pub fn search_output_navigate(&mut self) -> Result<u16, Box<dyn std::error::Error>> {
+        let mut count = 0;
+        // Start reading events from the terminal
+        for event in io::stdin().events() {
+            match event? {
+                Event::Key(Key::Char('\n')) => {
+                    count += 1;
+                    break; // Stop at Enter key
+                }
+                Event::Key(Key::Char('\t')) => {
+                    break; // Stop at Tab key
+                }
+                Event::Key(Key::Backspace) => {
+                    // Go to Previous Result
+                }
+                _ => {}
+            }
+        }
+
+        self.terminal.flush()?;
+
+        Ok(count)
     }
 
     fn draw_horizontal_bar(&mut self, width: u16) -> Result<(), Box<dyn std::error::Error>> {
@@ -324,7 +353,7 @@ impl QvaultTerminal {
         }
     }
 
-    fn render_ui(
+    fn render_settings_ui(
         &mut self,
         username: &str,
         password: &str,
@@ -416,7 +445,7 @@ impl QvaultTerminal {
         let mut password = String::new();
         let mut active_field = 0; // 0: username, 1: password, 2: cancel, 3: submit
 
-        self.render_ui(&username, &password, active_field)?;
+        self.render_settings_ui(&username, &password, active_field)?;
 
         // Input loop
         for key in stdin.keys() {
@@ -471,7 +500,7 @@ impl QvaultTerminal {
                 Key::Esc => break, // Exit on Esc key
                 _ => {}
             }
-            self.render_ui(&username, &password, active_field)?;
+            self.render_settings_ui(&username, &password, active_field)?;
         }
 
         Ok(())

@@ -92,10 +92,15 @@ pub fn handle_search(args: &[String], term: &mut QvaultTerminal) {
     if !args.is_empty() {
         match qvault_search::search_brave(&args[0]) {
             Ok(result) => {
-                term.show_output_title(result.title().to_string());
-                term.show_output_message(1, result.snippet().to_string());
-                term.show_output_url(result.url());
-                term.show_output_nav(result.count());
+                loop {
+                    term.show_output_title(result.title().to_string());
+                    term.show_output_message(1, result.snippet().to_string());
+                    term.show_output_url(result.url());
+                    term.show_output_nav(result.count());
+                    if let Ok(c) = term.search_output_navigate() {
+                        break;
+                    }
+                }
             }
             Err(err) => {
                 term.show_msg(format!("Search failed: {}", err));

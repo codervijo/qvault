@@ -63,21 +63,6 @@ impl SearchItemList {
 }
 
 /*
-fn notmain() {
-    // Create a PeopleManager
-    let mut manager = PeopleManager::new();
-
-    // Add people using OOP-style methods
-    manager.add_person("Alice", 30);
-    manager.add_person("Bob", 25);
-    manager.add_person("Charlie", 40);
-
-    // Display all people
-    manager.display_all();
-}
-*/
-
-/*
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SearchResult {
     title: String,
