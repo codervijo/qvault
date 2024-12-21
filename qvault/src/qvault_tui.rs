@@ -137,7 +137,7 @@ impl QvaultTerminal {
 
         if num_results > 1 {
             // Print the "Next Page →" aligned to the right
-            let right_text = "Next Page →";
+            let right_text = "Next Page → ";
             let right_x = width.saturating_sub(right_text.len() as u16);
             write!(
                 self.terminal,
@@ -166,6 +166,7 @@ impl QvaultTerminal {
                     break; // Stop at Enter key
                 }
                 Event::Key(Key::Char('\t')) => {
+                    count = 0;
                     break; // Stop at Tab key
                 }
                 Event::Key(Key::Backspace) => {

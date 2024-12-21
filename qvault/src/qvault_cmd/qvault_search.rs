@@ -13,6 +13,7 @@ use crate::qvault_log::log_info;
 pub struct SearchResult {
     error: Option<String>,
     status: Option<u16>,
+    index: usize,
     items: Option<Vec<SearchItem>>,
 }
 
@@ -104,21 +105,21 @@ impl fmt::Display for SearchItem {
 impl SearchResult {
     pub fn title(&self) -> &str {
         if let Some(items) = &self.items {
-            return &items[0].title;
+            return &items[self.index].title;
         }
         ""
     }
 
     pub fn url(&self) -> &str {
         if let Some(items) = &self.items {
-            return &items[0].url;
+            return &items[self.index].url;
         }
         &"https://google.com"
     }
 
     pub fn snippet(&self) -> &str {
         if let Some(items) = &self.items {
-            return &items[0].title;
+            return &items[self.index].title;
         }
         "This is a snippet from the search result"
     }
@@ -128,6 +129,16 @@ impl SearchResult {
             return items.len();
         }
         0
+    }
+
+    pub fn next_item(&mut self) -> usize {
+        if let Some(items) = &self.items {
+            self.index += 1;
+            if self.index == items.len() {
+                self.index = 0;
+            }
+        }
+        self.index
     }
 }
 
@@ -155,6 +166,7 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
         return Ok(SearchResult {
             error: Some("Search query cannot be empty.".to_string()),
             status: Some(400),
+            index: 0,
             items: None,
         });
     }
@@ -174,6 +186,7 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
         return Ok(SearchResult {
             error: Some("API key not found. Please set the 'BRAVE_SEARCH_API_KEY' environment variable or provide it in qvault.env.".to_string()),
             status: Some(401),
+            index: 0,
             items: None,
         });
     }
@@ -222,6 +235,7 @@ pub fn search_brave(query: &str) -> Result<SearchResult, String> {
                                     let search_result = SearchResult {
                                         error: None, // Populate fields appropriately
                                         status: Some(200), // Example data
+                                        index: 0,
                                         items: Some(silist.list),
                                     };
 
