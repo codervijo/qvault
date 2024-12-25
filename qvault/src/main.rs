@@ -1,10 +1,12 @@
 mod qvault_cmd;
 mod qvault_tui;
 mod qvault_log;
+mod qvault_history;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     qvault_log::init_log();
+    let qh = qvault_history::QvaultHistory::new()?;
 
     // Set up terminal
     let mut qtui = qvault_tui::QvaultTerminal::new()?;
@@ -18,11 +20,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         qtui.show_prompt()?;
         let iput = qtui.tui_get_input()?;
         qvault_log::log_info("Got input from User >>", format_args!("{}", iput));
-        let qcmd =
+        //let qcmd =
         match qvault_cmd::QvaultCmd::from_input(&iput){
             Ok(qcmd) => {
                 qcmd.clone().log_it();
                 qcmd.handle_cmd(&mut qtui);
+                qh.add_command(&qcmd.to_string());
             }
             Err(e) => {
                 qvault_log::log_info("Error parsing user input: ", format_args!("{}", iput));

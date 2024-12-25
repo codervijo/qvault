@@ -5,6 +5,7 @@ use std::fmt;
 use std::str::FromStr;
 use strum::EnumIter;
 use strum::IntoEnumIterator;
+use chrono::{DateTime, Utc};
 
 mod qvault_search;
 mod qvault_ai;
@@ -179,18 +180,21 @@ impl QvaultCmdName {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct QvaultCmd {
-    name: QvaultCmdName,
     args: Vec<String>,
+    cmd: QvaultCmdName,
+    cmdline: String,
+    count: u32,
+    date: DateTime<Utc>,
 }
 
 impl fmt::Display for QvaultCmd {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "QvaultCmd {{ name: {}, args: {:?} }}",
-            self.name,
+            "QvaultCmd {{ cmd: {}, args: {:?} }}",
+            self.cmd,
             self.args
         )
     }
@@ -204,15 +208,15 @@ impl QvaultCmd {
 
         let args = toks.into_iter().map(String::from).collect();
 
-        Ok(QvaultCmd { name: qcmd, args })
+        Ok(QvaultCmd { cmd: qcmd, args, cmdline: c.to_string(), count:1, date: Utc::now() })
     }
 
     pub fn handle_cmd(&self, term: &mut QvaultTerminal) {
-        let handler = self.name.get_handler();
+        let handler = self.cmd.get_handler();
         handler(&self.args, term);
     }
 
     pub fn log_it(&self) {
-        qvault_log::log_info("Command executed:", format_args!("{}", self.name));
+        qvault_log::log_info("Command executed:", format_args!("{}", self.cmd));
     }
 }
